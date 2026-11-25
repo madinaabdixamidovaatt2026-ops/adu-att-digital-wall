@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MySQL demo</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 680px; margin: 40px auto; padding: 0 16px; }
+    h1 { color: #174b5a; }
+    form { display: flex; gap: 8px; margin: 20px 0; }
+    input { flex: 1; padding: 12px; font-size: 16px; }
+    button { padding: 12px 18px; cursor: pointer; }
+    li { padding: 8px 0; border-bottom: 1px solid #ddd; }
+    #status { color: #555; }
+  </style>
+</head>
+<body>
+  <h1>MySQL eslatmalar</h1>
+  <p>Ism yoki eslatmani kiriting:</p>
+  <form id="noteForm">
+    <input id="name" name="name" maxlength="100" placeholder="Matn kiriting..." required>
+    <button type="submit">Saqlash</button>
+  </form>
+  <p id="status" role="status"></p>
+  <ul id="notes"></ul>
+
+  <script>
+    const form = document.getElementById("noteForm");
+    const input = document.getElementById("name");
+    const notes = document.getElementById("notes");
+    const status = document.getElementById("status");
+
+    async function loadNotes() {
+      try {
+        const response = await fetch("/.netlify/functions/api");
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Ma'lumotni yuklab bo'lmadi");
+        notes.replaceChildren();
+        data.forEach(item => {
+          const li = document.createElement("li");
+          const date = item.created_at ? new Date(item.created_at).toLocaleString() : "";
+          li.textContent = date ? `${item.name} — ${date}` : item.name;
+          notes.appendChild(li);
+        });
+      } catch (error) {
+        status.textContent = "Xatolik: " + error.message;
+      }
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      status.textContent = "Saqlanmoqda...";
+      try {
+        const response = await fetch("/.netlify/functions/api", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: input.value })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Saqlash amalga oshmadi");
+        input.value = "";
+        status.textContent = "Saqlandi!";
+        await loadNotes();
+      } catch (error) {
+        status.textContent = "Xatolik: " + error.message;
+      }
+    });
+
+    loadNotes();
+  </script>
+</body>
+</html>
