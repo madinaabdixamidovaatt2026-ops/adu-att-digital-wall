@@ -3,66 +3,579 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MySQL demo</title>
+  <title>ESLATMALAR</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: Arial, sans-serif; max-width: 680px; margin: 40px auto; padding: 0 16px; }
-    h1 { color: #174b5a; }
-    form { display: flex; gap: 8px; margin: 20px 0; }
-    input { flex: 1; padding: 12px; font-size: 16px; }
-    button { padding: 12px 18px; cursor: pointer; }
-    li { padding: 8px 0; border-bottom: 1px solid #ddd; }
-    #status { color: #555; }
+    :root {
+      --ink: #2a2140;
+      --ink-soft: #6b6283;
+      --glass: rgba(255, 255, 255, 0.48);
+      --glass-strong: rgba(255, 255, 255, 0.68);
+      --glass-border: rgba(255, 255, 255, 0.75);
+      --shadow: 0 20px 50px -18px rgba(90, 60, 150, 0.35), 0 6px 18px -10px rgba(90, 60, 150, 0.25);
+      --grad: linear-gradient(135deg, #ff7eb3 0%, #a77bff 50%, #5fb8ff 100%);
+      --danger: #ff4d79;
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { margin: 0; min-height: 100%; }
+
+    body {
+      font-family: "Manrope", system-ui, -apple-system, sans-serif;
+      color: var(--ink);
+      background: linear-gradient(160deg, #fff1e8 0%, #fde4f2 30%, #ece3ff 60%, #ddf3ff 100%);
+      background-attachment: fixed;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Suzib yuruvchi yumshoq rangli dog‘lar */
+    .blobs { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+    .blob {
+      position: absolute;
+      width: 46vmax; height: 46vmax;
+      border-radius: 50%;
+      filter: blur(70px);
+      opacity: 0.55;
+      animation: float 22s ease-in-out infinite alternate;
+    }
+    .blob.b1 { background: #ffb3d1; top: -14vmax; left: -10vmax; }
+    .blob.b2 { background: #c6b3ff; top: 20vh; right: -16vmax; animation-delay: -6s; animation-duration: 26s; }
+    .blob.b3 { background: #a8ecd8; bottom: -18vmax; left: 10vw; animation-delay: -12s; animation-duration: 30s; }
+    .blob.b4 { background: #ffd8a8; bottom: 10vh; right: 20vw; width: 28vmax; height: 28vmax; animation-delay: -3s; }
+
+    @keyframes float {
+      0%   { transform: translate(0, 0) scale(1); }
+      50%  { transform: translate(4vw, -3vh) scale(1.08); }
+      100% { transform: translate(-3vw, 4vh) scale(0.95); }
+    }
+
+    main {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 56px 20px 80px;
+    }
+
+    .glass {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(22px) saturate(160%);
+      -webkit-backdrop-filter: blur(22px) saturate(160%);
+    }
+
+    /* Bosh karta */
+    .hero {
+      padding: 40px 36px 32px;
+      position: relative;
+      animation: rise 0.7s cubic-bezier(.2,.8,.2,1) both;
+    }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 14px;
+      font-size: 13px; font-weight: 600; letter-spacing: 0.02em;
+      color: #7a4fd6;
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(167, 123, 255, 0.25);
+      border-radius: 999px;
+    }
+    .badge .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--grad);
+      box-shadow: 0 0 0 4px rgba(167, 123, 255, 0.18);
+      animation: pulse 2.4s ease-in-out infinite;
+    }
+    @keyframes pulse { 50% { box-shadow: 0 0 0 8px rgba(167, 123, 255, 0); } }
+
+    h1 {
+      font-family: "Fraunces", Georgia, serif;
+      font-weight: 700;
+      font-size: clamp(36px, 7vw, 54px);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      margin: 18px 0 10px;
+    }
+    h1.title-caps { letter-spacing: 0.04em; }
+    h1.title-caps em { font-style: normal; font-weight: 700; }
+    h1 em {
+      font-style: italic;
+      font-weight: 500;
+      background: var(--grad);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .lead { margin: 0 0 26px; color: var(--ink-soft); font-size: 17px; line-height: 1.55; }
+
+    form { display: flex; gap: 12px; }
+
+    .field { flex: 1; position: relative; }
+
+    input {
+      width: 100%;
+      padding: 17px 72px 17px 20px;
+      font: inherit; font-size: 16px; font-weight: 500;
+      color: var(--ink);
+      background: var(--glass-strong);
+      border: 1.5px solid rgba(255, 255, 255, 0.9);
+      border-radius: 18px;
+      outline: none;
+      transition: border-color .25s, box-shadow .25s, background .25s;
+    }
+    input::placeholder { color: #a59cbc; }
+    input:focus {
+      background: #fff;
+      border-color: #b99cff;
+      box-shadow: 0 0 0 5px rgba(167, 123, 255, 0.18);
+    }
+
+    .counter {
+      position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+      font-size: 12px; font-weight: 600; color: #b3abc8;
+      pointer-events: none;
+    }
+
+    /* Asosiy tugma */
+    .btn {
+      position: relative;
+      overflow: hidden;
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 0 26px;
+      font: inherit; font-size: 16px; font-weight: 700;
+      color: #fff;
+      background: var(--grad);
+      background-size: 200% 200%;
+      border: 0;
+      border-radius: 18px;
+      cursor: pointer;
+      box-shadow: 0 12px 26px -10px rgba(167, 80, 255, 0.65);
+      transition: transform .18s cubic-bezier(.3,1.6,.5,1), box-shadow .25s, background-position .6s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn:hover { background-position: 100% 50%; transform: translateY(-2px); box-shadow: 0 16px 30px -10px rgba(167, 80, 255, 0.75); }
+    .btn:active { transform: translateY(1px) scale(0.95); box-shadow: 0 6px 14px -8px rgba(167, 80, 255, 0.7); }
+    .btn:focus-visible { outline: 3px solid rgba(167, 123, 255, 0.5); outline-offset: 3px; }
+    .btn:disabled { cursor: wait; opacity: 0.85; }
+    .btn svg { width: 18px; height: 18px; transition: transform .3s; }
+    .btn:hover svg { transform: rotate(90deg); }
+
+    .btn.loading .label { opacity: 0.0; }
+    .btn.loading svg { opacity: 0; }
+    .btn.loading::after {
+      content: ""; position: absolute; left: 50%; top: 50%;
+      width: 20px; height: 20px; margin: -10px 0 0 -10px;
+      border: 2.5px solid rgba(255,255,255,0.4); border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Bosilganda to‘lqin effekti */
+    .ripple {
+      position: absolute; border-radius: 50%;
+      background: rgba(255, 255, 255, 0.55);
+      transform: scale(0);
+      animation: ripple .6s ease-out forwards;
+      pointer-events: none;
+    }
+    @keyframes ripple { to { transform: scale(4); opacity: 0; } }
+
+    /* Bildirishnoma */
+    .toast {
+      position: fixed; left: 50%; bottom: 28px;
+      transform: translate(-50%, 30px);
+      padding: 13px 22px;
+      font-weight: 600; font-size: 15px;
+      color: #fff;
+      background: rgba(42, 33, 64, 0.88);
+      border-radius: 999px;
+      box-shadow: 0 14px 30px -12px rgba(42, 33, 64, 0.6);
+      backdrop-filter: blur(10px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .3s, transform .4s cubic-bezier(.2,1.4,.4,1);
+      z-index: 10;
+      white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    .toast.error { background: rgba(214, 40, 90, 0.92); }
+
+    /* Ro‘yxat bo‘limi */
+    .list-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin: 44px 6px 16px;
+      animation: rise 0.7s .1s cubic-bezier(.2,.8,.2,1) both;
+    }
+    h2 {
+      font-family: "Fraunces", Georgia, serif;
+      font-weight: 500;
+      font-size: 26px;
+      margin: 0;
+      letter-spacing: -0.01em;
+    }
+    .count {
+      min-width: 40px;
+      padding: 6px 14px;
+      font-size: 14px; font-weight: 700; text-align: center;
+      color: #7a4fd6;
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      border-radius: 999px;
+      box-shadow: 0 6px 16px -10px rgba(90, 60, 150, 0.4);
+    }
+
+    #notes { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+
+    .note {
+      --accent: #ff7eb3;
+      position: relative;
+      display: flex; align-items: center; gap: 16px;
+      padding: 18px 18px 18px 24px;
+      overflow: hidden;
+      animation: rise .55s cubic-bezier(.2,.8,.2,1) both;
+      animation-delay: calc(var(--i, 0) * 45ms);
+      transition: transform .25s, box-shadow .25s;
+    }
+    .note::before {
+      content: ""; position: absolute; left: 0; top: 14px; bottom: 14px;
+      width: 5px; border-radius: 0 6px 6px 0;
+      background: var(--accent);
+    }
+    .note:hover { transform: translateY(-3px); box-shadow: 0 26px 50px -20px rgba(90, 60, 150, 0.45), 0 6px 18px -10px rgba(90, 60, 150, 0.25); }
+
+    .note:nth-child(5n+1) { --accent: #ff7eb3; }
+    .note:nth-child(5n+2) { --accent: #a77bff; }
+    .note:nth-child(5n+3) { --accent: #5fb8ff; }
+    .note:nth-child(5n+4) { --accent: #3fd0a8; }
+    .note:nth-child(5n+5) { --accent: #ffad5c; }
+
+    .note.fresh { animation: pop .6s cubic-bezier(.2,1.5,.4,1) both; animation-delay: 0s; }
+    .note.removing { animation: out .45s cubic-bezier(.6,0,.4,1) forwards; animation-delay: 0s; pointer-events: none; }
+
+    .avatar {
+      flex: none;
+      width: 44px; height: 44px;
+      display: grid; place-items: center;
+      font-family: "Fraunces", Georgia, serif; font-weight: 700; font-size: 19px;
+      color: #fff;
+      background: var(--accent);
+      border-radius: 14px;
+      box-shadow: 0 8px 18px -8px var(--accent);
+      text-transform: uppercase;
+    }
+
+    .note-body { flex: 1; min-width: 0; }
+    .note-text {
+      margin: 0 0 4px;
+      font-size: 16.5px; font-weight: 600;
+      line-height: 1.4;
+      word-wrap: break-word; overflow-wrap: anywhere;
+    }
+    .note-date { margin: 0; font-size: 13px; color: var(--ink-soft); display: flex; align-items: center; gap: 6px; }
+    .note-date svg { width: 13px; height: 13px; opacity: .7; }
+
+    /* O‘chirish tugmasi */
+    .del {
+      flex: none;
+      position: relative; overflow: hidden;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      height: 42px; min-width: 42px;
+      padding: 0 11px;
+      font: inherit; font-size: 13.5px; font-weight: 700;
+      color: #c2416a;
+      background: rgba(255, 255, 255, 0.75);
+      border: 1px solid rgba(255, 77, 121, 0.2);
+      border-radius: 13px;
+      cursor: pointer;
+      transition: background .2s, color .2s, transform .18s cubic-bezier(.3,1.6,.5,1), box-shadow .2s, padding .25s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .del svg { width: 18px; height: 18px; transition: transform .3s; }
+    .del:hover { background: #fff0f4; transform: translateY(-1px); box-shadow: 0 8px 18px -10px rgba(255, 77, 121, 0.7); }
+    .del:hover svg { transform: rotate(-12deg); }
+    .del:active { transform: scale(0.88); }
+    .del:focus-visible { outline: 3px solid rgba(255, 77, 121, 0.4); outline-offset: 2px; }
+    .del .confirm-label { display: none; }
+    .del.confirm { color: #fff; background: var(--danger); border-color: transparent; padding: 0 14px; animation: shake .4s; }
+    .del.confirm .confirm-label { display: inline; }
+    .del.confirm .ripple { background: rgba(255,255,255,.45); }
+    .del .ripple { background: rgba(255, 77, 121, 0.25); }
+
+    @keyframes shake {
+      20% { transform: translateX(-3px) rotate(-2deg); }
+      40% { transform: translateX(3px) rotate(2deg); }
+      60% { transform: translateX(-2px); }
+      80% { transform: translateX(2px); }
+    }
+
+    /* Bo‘sh holat va yuklanish */
+    .empty {
+      padding: 42px 24px;
+      text-align: center;
+      color: var(--ink-soft);
+      animation: rise .6s cubic-bezier(.2,.8,.2,1) both;
+    }
+    .empty .icon { font-size: 42px; margin-bottom: 8px; display: block; animation: bob 3s ease-in-out infinite; }
+    .empty strong { display: block; color: var(--ink); font-size: 18px; margin-bottom: 4px; }
+    @keyframes bob { 50% { transform: translateY(-6px); } }
+
+    .skeleton { height: 80px; position: relative; overflow: hidden; }
+    .skeleton::after {
+      content: ""; position: absolute; inset: 0;
+      background: linear-gradient(100deg, transparent 20%, rgba(255,255,255,.65) 50%, transparent 80%);
+      transform: translateX(-100%);
+      animation: shimmer 1.4s infinite;
+    }
+    @keyframes shimmer { to { transform: translateX(100%); } }
+
+    @keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+    @keyframes pop  { 0% { opacity: 0; transform: scale(.85) translateY(-10px); } 100% { opacity: 1; transform: none; } }
+    @keyframes out  {
+      0%   { opacity: 1; transform: none; max-height: 140px; }
+      60%  { opacity: 0; transform: translateX(60px) scale(.96); max-height: 140px; margin-bottom: 0; }
+      100% { opacity: 0; transform: translateX(60px) scale(.96); max-height: 0; padding-top: 0; padding-bottom: 0; margin-top: -14px; }
+    }
+
+    footer { margin-top: 40px; text-align: center; font-size: 13px; color: #9b92b3; }
+
+    @media (max-width: 560px) {
+      main { padding-top: 32px; }
+      .hero { padding: 30px 22px 24px; }
+      form { flex-direction: column; }
+      .btn { justify-content: center; height: 56px; }
+      .note { padding: 16px 14px 16px 20px; gap: 12px; }
+      .avatar { width: 38px; height: 38px; font-size: 17px; border-radius: 12px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+    }
   </style>
 </head>
 <body>
-  <h1>MySQL eslatmalar</h1>
-  <p>Ism yoki eslatmani kiriting:</p>
-  <form id="noteForm">
-    <input id="name" name="name" maxlength="100" placeholder="Matn kiriting..." required>
-    <button type="submit">Saqlash</button>
-  </form>
-  <p id="status" role="status"></p>
-  <ul id="notes"></ul>
+  <div class="blobs" aria-hidden="true">
+    <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div>
+  </div>
+
+  <main>
+    <section class="hero glass">
+      <span class="badge"><span class="dot"></span>Raqamli devor</span>
+      <h1 class="title-caps"><em>ESLATMALAR</em></h1>
+      <p class="lead">Ismingiz, fikringiz yoki eslatmangizni yozing — u darhol bazaga saqlanadi va quyidagi ro‘yxatda paydo bo‘ladi.</p>
+
+      <form id="noteForm" autocomplete="off">
+        <div class="field">
+          <label for="name" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Eslatma matni</label>
+          <input id="name" name="name" maxlength="100" placeholder="Matn kiriting..." required>
+          <span class="counter" id="counter">0/100</span>
+        </div>
+        <button type="submit" class="btn" id="saveBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          <span class="label">Saqlash</span>
+        </button>
+      </form>
+    </section>
+
+    <div class="list-head">
+      <h2>Saqlangan eslatmalar</h2>
+      <span class="count" id="count" aria-label="Eslatmalar soni">…</span>
+    </div>
+
+    <ul id="notes" aria-live="polite">
+      <li class="glass skeleton"></li>
+      <li class="glass skeleton"></li>
+      <li class="glass skeleton"></li>
+    </ul>
+
+    <footer>Har bir eslatma xavfsiz bazada saqlanadi ✨</footer>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script>
+    const API = "/.netlify/functions/api";
     const form = document.getElementById("noteForm");
     const input = document.getElementById("name");
-    const notes = document.getElementById("notes");
-    const status = document.getElementById("status");
+    const counter = document.getElementById("counter");
+    const saveBtn = document.getElementById("saveBtn");
+    const list = document.getElementById("notes");
+    const count = document.getElementById("count");
+    const toast = document.getElementById("toast");
+
+    const clockIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+    const trashIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>';
+
+    let toastTimer;
+    function showToast(message, isError = false) {
+      toast.textContent = message;
+      toast.classList.toggle("error", isError);
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 2600);
+    }
+
+    // Tugma bosilganda to‘lqin effekti
+    function addRipple(event) {
+      const btn = event.currentTarget;
+      const rect = btn.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      const ripple = document.createElement("span");
+      ripple.className = "ripple";
+      ripple.style.width = ripple.style.height = size + "px";
+      const x = (event.clientX || rect.left + rect.width / 2) - rect.left - size / 2;
+      const y = (event.clientY || rect.top + rect.height / 2) - rect.top - size / 2;
+      ripple.style.left = x + "px";
+      ripple.style.top = y + "px";
+      btn.appendChild(ripple);
+      ripple.addEventListener("animationend", () => ripple.remove());
+    }
+    saveBtn.addEventListener("pointerdown", addRipple);
+
+    function formatDate(value) {
+      if (!value) return "";
+      const d = new Date(value);
+      if (isNaN(d)) return "";
+      const months = ["yanvar", "fevral", "mart", "aprel", "may", "iyun", "iyul", "avgust", "sentabr", "oktabr", "noyabr", "dekabr"];
+      const pad = n => String(n).padStart(2, "0");
+      return `${d.getDate()}-${months[d.getMonth()]}, ${d.getFullYear()} · ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    function updateCount(n) {
+      count.textContent = n;
+    }
+
+    function renderEmpty() {
+      const li = document.createElement("li");
+      li.className = "glass empty";
+      li.innerHTML = '<span class="icon">🌸</span><strong>Hozircha eslatmalar yo‘q</strong>Birinchi eslatmani yuqorida yozib qoldiring!';
+      list.replaceChildren(li);
+    }
+
+    function render(items, freshId = null) {
+      updateCount(items.length);
+      if (!items.length) return renderEmpty();
+
+      const frag = document.createDocumentFragment();
+      items.forEach((item, index) => {
+        const li = document.createElement("li");
+        li.className = "note glass" + (item.id === freshId ? " fresh" : "");
+        li.style.setProperty("--i", Math.min(index, 12));
+        li.dataset.id = item.id;
+
+        const avatar = document.createElement("div");
+        avatar.className = "avatar";
+        avatar.textContent = (item.name || "?").trim().charAt(0) || "?";
+
+        const body = document.createElement("div");
+        body.className = "note-body";
+        const text = document.createElement("p");
+        text.className = "note-text";
+        text.textContent = item.name;
+        body.appendChild(text);
+
+        const dateStr = formatDate(item.created_at);
+        if (dateStr) {
+          const date = document.createElement("p");
+          date.className = "note-date";
+          date.innerHTML = clockIcon;
+          date.append(dateStr);
+          body.appendChild(date);
+        }
+
+        const del = document.createElement("button");
+        del.type = "button";
+        del.className = "del";
+        del.setAttribute("aria-label", "Eslatmani o‘chirish");
+        del.title = "O‘chirish";
+        del.innerHTML = trashIcon + '<span class="confirm-label">O‘chirilsinmi?</span>';
+        del.addEventListener("pointerdown", addRipple);
+        del.addEventListener("click", () => handleDelete(item.id, li, del));
+
+        li.append(avatar, body, del);
+        frag.appendChild(li);
+      });
+      list.replaceChildren(frag);
+    }
+
+    async function request(url, options) {
+      const response = await fetch(url, options);
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "So‘rov bajarilmadi");
+      return data;
+    }
 
     async function loadNotes() {
       try {
-        const response = await fetch("/.netlify/functions/api");
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || "Ma'lumotni yuklab bo'lmadi");
-        notes.replaceChildren();
-        data.forEach(item => {
-          const li = document.createElement("li");
-          const date = item.created_at ? new Date(item.created_at).toLocaleString() : "";
-          li.textContent = date ? `${item.name} — ${date}` : item.name;
-          notes.appendChild(li);
-        });
+        render(await request(API));
       } catch (error) {
-        status.textContent = "Xatolik: " + error.message;
+        list.replaceChildren();
+        updateCount(0);
+        showToast("Xatolik: " + error.message, true);
       }
     }
 
+    // O‘chirish: birinchi bosishda tasdiq so‘raladi, ikkinchisida o‘chiriladi
+    async function handleDelete(id, li, btn) {
+      if (!btn.classList.contains("confirm")) {
+        document.querySelectorAll(".del.confirm").forEach(b => b !== btn && b.classList.remove("confirm"));
+        btn.classList.add("confirm");
+        clearTimeout(btn._timer);
+        btn._timer = setTimeout(() => btn.classList.remove("confirm"), 3000);
+        return;
+      }
+      clearTimeout(btn._timer);
+      btn.disabled = true;
+      li.classList.add("removing");
+      try {
+        const [rows] = await Promise.all([
+          request(`${API}?id=${encodeURIComponent(id)}`, { method: "DELETE" }),
+          new Promise(r => setTimeout(r, 450))
+        ]);
+        render(rows);
+        showToast("Eslatma o‘chirildi 🗑️");
+      } catch (error) {
+        li.classList.remove("removing");
+        btn.disabled = false;
+        btn.classList.remove("confirm");
+        showToast("Xatolik: " + error.message, true);
+      }
+    }
+
+    input.addEventListener("input", () => {
+      counter.textContent = `${input.value.length}/100`;
+    });
+
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
-      status.textContent = "Saqlanmoqda...";
+      const value = input.value.trim();
+      if (!value) {
+        input.focus();
+        return;
+      }
+      saveBtn.disabled = true;
+      saveBtn.classList.add("loading");
       try {
-        const response = await fetch("/.netlify/functions/api", {
+        const rows = await request(API, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: input.value })
+          body: JSON.stringify({ name: value })
         });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || "Saqlash amalga oshmadi");
         input.value = "";
-        status.textContent = "Saqlandi!";
-        await loadNotes();
+        counter.textContent = "0/100";
+        render(rows, rows[0]?.id);
+        showToast("Saqlandi! ✨");
       } catch (error) {
-        status.textContent = "Xatolik: " + error.message;
+        showToast("Xatolik: " + error.message, true);
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.classList.remove("loading");
       }
     });
 
